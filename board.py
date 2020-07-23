@@ -5,7 +5,7 @@ import piece
 from copy import deepcopy
 import json
 
-BOARD_X = 10
+BOARD_X = 30
 BOARD_Y = 5
 BOARD_WIDTH = 41
 BOARD_HEIGHT = 41
@@ -15,27 +15,28 @@ ROWS = 24
 tile_width = BOARD_WIDTH//10
 tile_height = BOARD_HEIGHT//20
 
+
+hold_rect_width = tile_width * 6
+hold_rect_height = tile_height * 4 
+hold_rect_x = BOARD_X - hold_rect_width - tile_width
+
+
 with open("rotations.json", "r") as r:
     ROTATIONS = json.loads(r.read())
 
 
 def rotate_right(matrix):
-    try:
-        return list(zip(*matrix[::-1]))
-    except TypeError:
-        return [[i] for i in matrix[::-1]]
+    return list(zip(*matrix[::-1]))
 
 def rotate_left(matrix):
-    try:
-        return list(zip(*[i[::-1] for i in matrix]))
-    except TypeError:
-        return [[i] for i in matrix]
+    return list(zip(*[i[::-1] for i in matrix]))
 
 
 class Board():
     def __init__(self):
         self.screen = self.initscr()
         self.board = [[0] * 10 for i in range(ROWS)]
+        self.held_piece = None
 
     def initscr(self): 
         stdscr =  curses.initscr()
@@ -56,6 +57,18 @@ class Board():
         curses.curs_set(1)
         curses.endwin()
     
+    def hold_piece(self):
+        """
+        Switch the active piece and the held piece, returning both to default 
+        coordinates and rotation
+        """
+        self.held_piece, self.active_piece = self.active_piece, self.held_piece
+        if self.active_piece:
+            self.active_piece = piece.Piece(self.active_piece.name)
+        self.held_piece = piece.Piece(self.held_piece.name)
+        self.held_piece.x = -6
+        self.held_piece.y = 18
+
     def display(self):
         """
         Displays tiles and border of the board, the active piece, and a preview piece of where it will land
@@ -84,8 +97,16 @@ class Board():
         _piece = deepcopy(self.active_piece)
         _piece.y = lowest_y
         _piece.show(self.screen, "*")
-
+        
         self.active_piece.show(self.screen, "#")
+         
+
+        rectangle(self.screen, 
+                BOARD_Y,                    hold_rect_x,
+                BOARD_Y + hold_rect_height, hold_rect_x + hold_rect_width)
+
+        if self.held_piece:
+            self.held_piece.show(self.screen, "#")
 
         self.screen.refresh()
 

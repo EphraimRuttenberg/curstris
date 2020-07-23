@@ -37,7 +37,8 @@ class Game():
             if self.board.gravity():
                 self.board.active_piece = piece.Piece(self.retrieve_piece())
 
-        if not self.board.check_valid_piece(self.board.active_piece):
+        if not self.board.check_valid_piece(self.board.active_piece) and \
+                self.board.active_piece.y == 18:
             raise PieceOverlap()
         
         self.board.delete_full_rows()
@@ -84,4 +85,9 @@ class Game():
 
             if c == "s":
                 self.board.rotate_piece(board.rotate_right, 1)
+
+            if c == " ":
+                self.board.hold_piece()
+                if self.board.active_piece is None:
+                    self.board.active_piece = piece.Piece(self.retrieve_piece())
 
