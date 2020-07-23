@@ -1,9 +1,11 @@
 import curses
 from curses.textpad import rectangle
-from random import randint
+from random import randint, sample
 import piece
 from copy import deepcopy
 import json
+
+LETTERS = list("SZLJTOI")
 
 BOARD_X = 30
 BOARD_Y = 5
@@ -15,10 +17,13 @@ ROWS = 24
 tile_width = BOARD_WIDTH//10
 tile_height = BOARD_HEIGHT//20
 
-
 hold_rect_width = tile_width * 6
 hold_rect_height = tile_height * 4 
 hold_rect_x = BOARD_X - hold_rect_width - tile_width
+
+queue_rect_width = tile_width * 6
+queue_rect_height = tile_height * 17
+queue_rect_x = BOARD_X + queue_rect_width + (5 * tile_width)
 
 
 with open("rotations.json", "r") as r:
@@ -37,6 +42,8 @@ class Board():
         self.screen = self.initscr()
         self.board = [[0] * 10 for i in range(ROWS)]
         self.held_piece = None
+        self.bag = sample(LETTERS, k = len(LETTERS))
+        self.next_bag = sample(LETTERS, k = len(LETTERS))
 
     def initscr(self): 
         stdscr =  curses.initscr()
@@ -57,6 +64,16 @@ class Board():
         curses.curs_set(1)
         curses.endwin()
     
+    def retrieve_piece(self):
+        """
+        Take a piece from the bag, if the bag is empty, use the next_bag and create a new next_bag
+        """
+        if not self.bag:
+            self.bag = [*self.next_bag]
+            self.next_bag = sample(LETTERS, k=7)
+        return self.bag.pop(0)
+
+
     def hold_piece(self):
         """
         Switch the active piece and the held piece, returning both to default 
@@ -100,13 +117,22 @@ class Board():
         
         self.active_piece.show(self.screen, "#")
          
-
+        # Display the hold box and held piece
         rectangle(self.screen, 
                 BOARD_Y,                    hold_rect_x,
                 BOARD_Y + hold_rect_height, hold_rect_x + hold_rect_width)
-
         if self.held_piece:
             self.held_piece.show(self.screen, "#")
+
+        #Display the next 5 pieces
+        rectangle(self.screen,
+                BOARD_Y,                     queue_rect_x,
+                BOARD_Y + queue_rect_height, queue_rect_x + queue_rect_width)
+        for i, name in enumerate([*self.bag, *self.next_bag][:5]):
+            _piece = piece.Piece(name)
+            _piece.x = 12
+            _piece.y = 18 - (3 * i)
+            _piece.show(self.screen, "#")
 
         self.screen.refresh()
 
@@ -208,4 +234,6 @@ class Board():
                 self.board.append([0]*10)
                 row_count += 1
         return row_count
-
+    
+    def spawn_new_piece(self):
+        self.active_piece = piece.Piece(self.retrieve_piece())

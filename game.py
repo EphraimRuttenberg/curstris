@@ -3,7 +3,6 @@ import piece
 import random
 import curses
 
-LETTERS = ["L", "J", "S", "Z", "I", "T", "O"]
 
 
 class PieceOverlap(Exception):
@@ -12,21 +11,10 @@ class PieceOverlap(Exception):
 
 class Game():
     def __init__(self):
-        self.board = board.Board()
-        self.bag = random.sample(LETTERS, k=7)
-        self.next_bag = random.sample(LETTERS, k=7)
-        self.board.active_piece = piece.Piece(self.retrieve_piece())
         self.frame_count = 0
-    
-    def retrieve_piece(self):
-        """
-        Take a piece from the bag, if the bag is empty, use the next_bag and create a new next_bag
-        """
-        if not self.bag:
-            self.bag = [*self.next_bag]
-            self.next_bag = random.sample(LETTERS, k=7)
-        return self.bag.pop()
-   
+        self.board = board.Board()
+        self.board.spawn_new_piece()
+
     def update(self):
         """
         Do gravity, check for input, check if it has to reset, display pieces and tiles
@@ -35,7 +23,7 @@ class Game():
         if self.frame_count % 30 == 0:
             # board.gravity() returns 1 if it solidified a piece
             if self.board.gravity():
-                self.board.active_piece = piece.Piece(self.retrieve_piece())
+                self.board.spawn_new_piece()
 
         if not self.board.check_valid_piece(self.board.active_piece) and \
                 self.board.active_piece.y == 18:
@@ -78,7 +66,7 @@ class Game():
                 self.board.active_piece.y = lowest_y
                 self.board.solidify()
                 self.frame_count = 1
-                self.board.active_piece = piece.Piece(self.retrieve_piece())
+                self.board.spawn_new_piece()
             
             if c == "a":
                 self.board.rotate_piece(board.rotate_left, -1)
@@ -89,5 +77,5 @@ class Game():
             if c == " ":
                 self.board.hold_piece()
                 if self.board.active_piece is None:
-                    self.board.active_piece = piece.Piece(self.retrieve_piece())
+                    self.board.spawn_new_piece()
 
