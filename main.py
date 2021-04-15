@@ -22,6 +22,7 @@ def main():
             time. sleep(1.0/60 - frame_duration)
 
         except KeyboardInterrupt:
+            print("ctrl c")
             tetris_game.close()
             exit()
 

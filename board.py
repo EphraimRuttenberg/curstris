@@ -14,7 +14,7 @@ BOARD_HEIGHT = 41
 ROWS = 24  
 
 # Size of an ingame tile in characters
-tile_width = BOARD_WIDTH//10
+tile_width = (BOARD_WIDTH//10)
 tile_height = BOARD_HEIGHT//20
 
 hold_rect_width = tile_width * 6
@@ -52,6 +52,7 @@ class Board():
         curses.curs_set(0)
         stdscr.keypad(True)
         stdscr.nodelay(True)
+        curses.raw()
         curses.resizeterm(400, 400)
         return stdscr
 
@@ -122,7 +123,7 @@ class Board():
                 BOARD_Y,                    hold_rect_x,
                 BOARD_Y + hold_rect_height, hold_rect_x + hold_rect_width)
         if self.held_piece:
-            self.held_piece.show(self.screen, "#")
+            self.held_piece.show(self.screen, "█")
 
         #Display the next 5 pieces
         rectangle(self.screen,
@@ -132,7 +133,7 @@ class Board():
             _piece = piece.Piece(name)
             _piece.x = 12
             _piece.y = 18 - (3 * i)
-            _piece.show(self.screen, "#")
+            _piece.show(self.screen, "█")
 
         self.screen.refresh()
 

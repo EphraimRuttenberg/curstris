@@ -38,7 +38,7 @@ class Game():
         """
         Will have more functionality later, right now just returns the terminal
          setting backs to normal
-         """
+        """
         self.board.deinit_scr()
 
     def check_keys(self):
@@ -78,4 +78,8 @@ class Game():
                 self.board.hold_piece()
                 if self.board.active_piece is None:
                     self.board.spawn_new_piece()
+
+            if c == "KEY_BACKSPACE":
+                self.close()
+                exit()
 
